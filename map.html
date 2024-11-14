@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>ข่าวสถานการณ์โรค ศูนย์ปฏิบัติการภาวะฉุกเฉิน</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=TH+Sarabun+PSK&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <style>
+    body {
+      font-family: 'TH Sarabun PSK', Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .navbar-inverse {
+      background-color: #333;
+      border-color: #333;
+    }
+    .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav > li > a {
+      color: #f8f9fa !important;
+    }
+    .navbar-inverse .navbar-collapse {
+      text-align: center;
+    }
+    .sidenav {
+      background-color: #f1f1f1;
+      height: 100%;
+      padding-top: 20px;
+      border-right: 1px solid #ddd;
+    }
+    .sidenav h2 {
+      color: #333;
+    }
+    .sidenav ul {
+      padding-left: 0;
+    }
+    .sidenav ul li a {
+      color: #333;
+    }
+    .sidenav ul li a:hover {
+      color: #007bff;
+    }
+    .content {
+      height: auto;
+      padding: 20px;
+    }
+    .well {
+      background-color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .well h4 {
+      color: #007bff;
+    }
+    .stats-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: 0.3s;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .stats-card h4 {
+      font-size: 18px;
+      color: #333;
+    }
+    .stats-card p {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+      margin: 0;
+    }
+
+    /* Responsive Styles */
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        display: none;
+      }
+      .navbar-collapse {
+        text-align: left;
+      }
+      #ageChart, #sportChart, #diseaseChart, #positionChart {
+        width: 100% !important;
+        height: auto !important;
+      }
+      #chart-container {
+        width: 100%;
+        height: auto;
+      }
+    }
+    #map { height: 700px; width: 100%; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse visible-xs">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                         
+      </button>
+      <a class="navbar-brand" href="#">Dashboard</a>
+    </div>  
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row content">
+    <div class="col-sm-2 sidenav hidden-xs">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg/800px-Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg.png" alt="Logo" style="width:50%; max-width: 100%; margin-bottom: 10px;">
+      <ul class="nav nav-pills nav-stacked">
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
+      </ul>
+    </div>
+    
+    <div class="col-sm-9">
+      <div id="section1" class="section active">   
+      <h3>สถานที่ตั้งจากข้อมูลใน Google Sheets</h3>
+      <div id="map"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+    const sheetUrl = 'https://script.google.com/macros/s/AKfycbyZXp3Vc6k2JI77MmAglJpQ0wdBHpC_DHw_ZnFg2y5nLw9FqKHnMRCcM-yknvv_7dCvZw/exec';
+  
+    // Fetch data from Google Sheets
+    fetch(sheetUrl)
+      .then(response => response.json())
+      .then(data => {
+        // Initialize the map with a default zoom level
+        const map = L.map('map').setView([15.87, 100.9925], 6); // Starting point is Thailand
+  
+        // Add a tile layer from OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+  
+        // Create a LatLngBounds object to adjust the map's bounds
+        const bounds = L.latLngBounds();
+        
+        // Object to store the patient count for each location
+        const locationPatientCount = {};
+
+        // Create a custom icon for the marker
+        const customIcon = L.icon({
+          iconUrl: 'https://cdn0.iconfinder.com/data/icons/travel-vacation/289/travel-transport-hotel-vacation-holidays-tourist-tourism-travelling-traveling_147-512.png', // URL to your custom icon image
+          iconSize: [40, 40], // Size of the icon
+          iconAnchor: [32, 32], // Position of the icon relative to the marker
+          popupAnchor: [0, -32] // Position of the popup relative to the marker
+        });
+
+        // Loop through data to count patients for each location
+        data.forEach(location => {
+          const coordinates = location["พิกัดสถานที่ตั้ง"];
+          const placeName = location["ชื่อสถานที่พักนักกีฬา"];  // Get the name of the location from the correct column
+
+          if (coordinates && placeName) {
+            // Counting the number of patients for this location
+            if (locationPatientCount[placeName]) {
+              locationPatientCount[placeName]++;
+            } else {
+              locationPatientCount[placeName] = 1;  // Initialize count for the first occurrence
+            }
+
+            // Assuming coordinates are stored as "lat,lng" (e.g., "13.7563,100.5018")
+            const [lat, lng] = coordinates.split(',').map(Number); // Convert to numbers
+            
+            if (!isNaN(lat) && !isNaN(lng)) {
+              const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map)
+                .bindPopup(`<b>${placeName || 'สถานที่'}</b><br>ผู้ป่วย: ${locationPatientCount[placeName] || 0} คน`)  // Display patient count
+                .on('mouseover', function () {
+                  // Show popup on hover
+                  marker.openPopup();
+                })
+                .on('mouseout', function () {
+                  // Close popup when mouse leaves the marker
+                  marker.closePopup();
+                });
+  
+              // Extend the bounds to include the new marker position
+              bounds.extend([lat, lng]);
+            }
+          }
+        });
+  
+        // Fit the map view to the bounds of all markers
+        map.fitBounds(bounds);
+      })
+      .catch(error => console.error('Error fetching location data:', error));
+</script>
+
+
+
+  
+  
+<footer class="container-fluid text-center" style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: relative; left: 0;">
+  <p>ข้อมูลจาก: <a href="https://nsn.moph.go.th/" target="_blank" style="color: #f8f9fa;">กลุ่มงานควบคุมโรคติดต่อ สำนักงานธารณสุขจังหวัดนครสวรรค์</a> และ Google Sheets</p>
+  <p>พัฒนาโดย นายศิววงค์ เกิดลาภ ตำแหน่ง นักวิชาการสาธารณสุขชำนาญการ</p>
+</footer>
+</body>
+</html>

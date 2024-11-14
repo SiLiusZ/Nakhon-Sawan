@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>ข่าวสถานการณ์โรค ศูนย์ปฏิบัติการภาวะฉุกเฉิน</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=TH+Sarabun+PSK&display=swap" rel="stylesheet">
+  <style>
+    
+    body {
+      font-family: 'TH Sarabun PSK', Arial, sans-serif;
+      background-color: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+    }
+    .navbar-inverse {
+      background-color: #333;
+      border-color: #333;
+    }
+    .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav > li > a {
+      color: #f8f9fa !important;
+    }
+    .navbar-inverse .navbar-collapse {
+      text-align: center;
+    }
+    .sidenav {
+      background-color: #f1f1f1;
+      height: 100%;
+      padding-top: 20px;
+      border-right: 1px solid #ddd;
+    }
+    .sidenav h2 {
+      color: #333;
+    }
+    .sidenav ul {
+      padding-left: 0;
+    }
+    .sidenav ul li a {
+      color: #333;
+    }
+    .sidenav ul li a:hover {
+      color: #007bff;
+    }
+    .content {
+      height: auto;
+      padding: 20px;
+    }
+    .well {
+      background-color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .well h4 {
+      color: #007bff;
+    }
+    .stats-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: 0.3s;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .stats-card h4 {
+      font-size: 18px;
+      color: #333;
+    }
+    .stats-card p {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+      margin: 0;
+    }
+
+    /* Responsive Styles */
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        display: none;
+      }
+      .navbar-collapse {
+        text-align: left;
+      }
+      #ageChart, #sportChart, #diseaseChart, #positionChart {
+        width: 100% !important;
+        height: auto !important;
+      }
+      #chart-container {
+        width: 100%;
+        height: auto;
+      }
+      .container-fluid.text-center {
+        width: 100vw; /* กำหนดให้กินความกว้างเต็มจอ */
+        box-sizing: border-box; /* เพื่อให้ padding ไม่เพิ่มความกว้าง */
+        padding: 5px;
+        background-color: #006838;
+        color: #f8f9fa;
+        margin-top: 20px;
+      }
+      #map { height: 500px; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse visible-xs">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                         
+      </button>
+      <a class="navbar-brand" href="#">Dashboard</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row content">
+    <div class="col-sm-2 sidenav hidden-xs">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg/800px-Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg.png" alt="Logo" style="width:50%; max-width: 100%; margin-bottom: 10px;">
+      <ul class="nav nav-pills nav-stacked">
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
+      </ul>
+    </div>
+    
+    <div class="col-sm-9">
+      <div id="section1" class="section active">
+        <h4>ข่าวสถานการณ์โรค ศูนย์ปฏิบัติการภาวะฉุกเฉิน สำนักงานสาธารณสุข จังหวัดนครสวรรค์</h4>
+        <p>สถานการณ์โรค ของการแข่งขันกีฬานักเรียนองค์กรปกครองส่วนท้องถิ่นแห่งประเทศไทย ครั้งที่ 39</p>
+      </div>
+      
+
+      
+  <div class="row" id="stats-row"></div>
+
+
+  <div class="row" id="stats-row">
+    <div class="col-sm-6">
+      <div class="stats-card">
+        <h4>โรคที่พบ</h4>
+        <canvas id="diseaseChart" width="100" height="50"></canvas>
+      </div>
+    </div>
+  
+    <div class="col-sm-6">
+      <div class="stats-card">
+        <h4>ประเภทกีฬา</h4>
+        <canvas id="sportChart" width="100" height="50"></canvas>
+      </div>
+    </div>
+  
+    <div class="col-sm-6">
+      <div class="stats-card">
+        <h4>กลุ่มอายุ</h4>
+        <canvas id="ageChart" width="100" height="50"></canvas>
+      </div>
+    </div>
+  
+    <div class="col-sm-6">
+      <div class="stats-card">
+        <h4>ตำแหน่ง</h4>
+        <canvas id="positionChart" width="100" height="50"></canvas>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="stats-card">
+        <h4>สถานที่พัก</h4>
+        <canvas id="hotelChart" width="100" height="50"></canvas>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="stats-card">
+        <h4>สังกัด</h4>
+        <canvas id="affiliationChart" width="100" height="50"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  
+
+
+<script>
+  const sheetUrl = 'https://script.google.com/macros/s/AKfycbyZXp3Vc6k2JI77MmAglJpQ0wdBHpC_DHw_ZnFg2y5nLw9FqKHnMRCcM-yknvv_7dCvZw/exec';
+
+  function fetchSheetData() {
+    fetch(sheetUrl)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        displayStats(data);
+      })
+      .catch(error => console.error('Error fetching data: ', error));
+  }
+
+  function displayStats(data) {
+    const statsRow = document.getElementById("stats-row");
+
+    const patients = data || [];
+    const totalPatients = patients.length;
+    const genderData = {
+      male: patients.filter(patient => patient["เพศ"] === "ชาย").length,
+      female: patients.filter(patient => patient["เพศ"] === "หญิง").length
+    };
+    const uniqueDiseases = new Set(patients.map(patient => patient["ป่วยเป็นโรค"])).size;
+
+    statsRow.innerHTML = ` 
+      <div class="col-sm-3">
+        <div class="stats-card">
+          <h4>จำนวนผู้ป่วย</h4>
+          <p>${totalPatients}</p>
+        </div>
+      </div>
+        <div class="col-sm-3">
+        <div class="stats-card">
+          <h4>จำนวนโรคที่พบ</h4>
+          <p>${uniqueDiseases}</p>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="stats-card">
+          <h4>เพศชาย</h4>
+          <p>${genderData.male}</p>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="stats-card">
+          <h4>เพศหญิง</h4>
+          <p>${genderData.female}</p>
+        </div>
+      </div>
+
+    `;
+    const diseaseData = patients.reduce((acc, patient) => {
+      const disease = patient["ป่วยเป็นโรค"];
+      acc[disease] = acc[disease] ? acc[disease] + 1 : 1;
+      return acc;
+    }, {});
+    const sportData = patients.reduce((acc, patient) => {
+      const sport = patient["ประเภทกีฬา"];
+      acc[sport] = acc[sport] ? acc[sport] + 1 : 1;
+      return acc;
+    }, {});
+    const ageData = patients.reduce((acc, patient) => {
+      const ageRange = patient["Age range"];
+      acc[ageRange] = acc[ageRange] ? acc[ageRange] + 1 : 1;
+      return acc;
+    }, {});
+    const positionData = patients.reduce((acc, patient) => {
+      const position = patient["ตำแหน่ง"];
+      acc[position] = acc[position] ? acc[position] + 1 : 1;
+      return acc;
+    }, {});
+    const hotelData = patients.reduce((acc, patient) => {
+      const position = patient["ชื่อสถานที่พักนักกีฬา"];
+      acc[position] = acc[position] ? acc[position] + 1 : 1;
+      return acc;
+    }, {});
+    const affiliationData = patients.reduce((acc, patient) => {
+      const position = patient["ชื่อหน่วยงาน/สังกัดของท่าน เช่น โรงเรียนกีฬานครสวรรค์"];
+      acc[position] = acc[position] ? acc[position] + 1 : 1;
+      return acc;
+    }, {});
+
+    createChart('diseaseChart', 'โรคที่พบ', Object.keys(diseaseData), Object.values(diseaseData));
+    createChart('sportChart', 'ประเภทกีฬา', Object.keys(sportData), Object.values(sportData));
+    createChart('ageChart', 'กลุ่มอายุ', Object.keys(ageData), Object.values(ageData));
+    createChart('positionChart', 'ประเภท', Object.keys(positionData), Object.values(positionData));
+    createChart('hotelChart', 'สถานที่พัก', Object.keys(hotelData), Object.values(hotelData));
+    createChart('affiliationChart', 'ชื่อหน่วยงาน/สังกัดของท่าน', Object.keys(affiliationData), Object.values(affiliationData));
+  }
+
+  function createChart(chartId, label, labels, data) {
+  const ctx = document.getElementById(chartId).getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.7)', // สีชมพูอ่อน
+          'rgba(54, 162, 235, 0.7)', // สีน้ำเงินอ่อน
+          'rgba(255, 206, 86, 0.7)', // สีเหลืองอ่อน
+          'rgba(75, 192, 192, 0.7)', // สีเขียวอ่อน
+          'rgba(153, 102, 255, 0.7)', // สีม่วงอ่อน
+          'rgba(255, 159, 64, 0.7)' // สีส้มอ่อน
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)', // สีชมพู
+          'rgba(54, 162, 235, 1)', // สีน้ำเงิน
+          'rgba(255, 206, 86, 1)', // สีเหลือง
+          'rgba(75, 192, 192, 1)', // สีเขียว
+          'rgba(153, 102, 255, 1)', // สีม่วง
+          'rgba(255, 159, 64, 1)' // สีส้ม
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)', // สีกริดของแกน Y
+            display: false  // ลบเส้นตารางบนแกน Y
+          }
+        },
+        x: {
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)', // สีกริดของแกน X
+            display: false  // ลบเส้นตารางบนแกน X
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: {
+              family: 'TH Sarabun PSK',
+              size: 14
+            },
+            color: '#333'
+          }
+        },
+        datalabels: {
+          anchor: 'end', // การวางตำแหน่งของข้อความ
+          align: 'top', // จัดข้อความให้แสดงที่ด้านบนของแต่ละบาร์
+          color: '#333', // สีของข้อความ
+          font: {
+            size: 14,
+            family: 'TH Sarabun PSK' // ฟอนต์ของข้อความ
+          },
+          formatter: function(value) {
+            return value; // แสดงค่า
+          }
+        }
+      }
+    }
+  });
+}
+
+  // Initial data fetch and chart rendering
+  fetchSheetData();
+
+  function changePage(page) {
+    window.location.href = page; // ใช้ window.location.href เพื่อเปลี่ยนหน้าไปที่ที่ต้องการ
+  }
+</script>
+<footer class="container-fluid text-center" style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: relative; left: 0;">
+  <p>ข้อมูลจาก: <a href="https://nsn.moph.go.th/" target="_blank" style="color: #f8f9fa;">กลุ่มงานควบคุมโรคติดต่อ สำนักงานธารณสุขจังหวัดนครสวรรค์</a> และ Google Sheets</p>
+  <p>พัฒนาโดย นายศิววงค์ เกิดลาภ ตำแหน่ง นักวิชาการสาธารณสุขชำนาญการ</p>
+</footer>
+
+</body>
+</html>

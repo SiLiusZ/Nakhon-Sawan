@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>ข่าวสถานการณ์โรค ศูนย์ปฏิบัติการภาวะฉุกเฉิน</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=TH+Sarabun+PSK&display=swap" rel="stylesheet">
+  <style>
+    
+    body {
+      font-family: 'TH Sarabun PSK', Arial, sans-serif;
+      background-color: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+    }
+    .navbar-inverse {
+      background-color: #333;
+      border-color: #333;
+    }
+    .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav > li > a {
+      color: #f8f9fa !important;
+    }
+    .navbar-inverse .navbar-collapse {
+      text-align: center;
+    }
+    .sidenav {
+      background-color: #f1f1f1;
+      height: 100%;
+      padding-top: 20px;
+      border-right: 1px solid #ddd;
+    }
+    .sidenav h2 {
+      color: #333;
+    }
+    .sidenav ul {
+      padding-left: 0;
+    }
+    .sidenav ul li a {
+      color: #333;
+    }
+    .sidenav ul li a:hover {
+      color: #007bff;
+    }
+    .content {
+      height: auto;
+      padding: 20px;
+    }
+    .well {
+      background-color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .well h4 {
+      color: #007bff;
+    }
+    .stats-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: 0.3s;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .stats-card h4 {
+      font-size: 18px;
+      color: #333;
+    }
+    .stats-card p {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+      margin: 0;
+    }
+
+    /* Responsive Styles */
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        display: none;
+      }
+      .navbar-collapse {
+        text-align: left;
+      }
+      #ageChart, #sportChart, #diseaseChart, #positionChart {
+        width: 100% !important;
+        height: auto !important;
+      }
+      #chart-container {
+        width: 100%;
+        height: auto;
+      }
+      .container-fluid.text-center {
+        width: 100vw; /* กำหนดให้กินความกว้างเต็มจอ */
+        box-sizing: border-box; /* เพื่อให้ padding ไม่เพิ่มความกว้าง */
+        padding: 5px;
+        background-color: #006838;
+        color: #f8f9fa;
+        margin-top: 20px;
+      }
+      #map { height: 500px; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse visible-xs">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                         
+      </button>
+      <a class="navbar-brand" href="#">Dashboard</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row content">
+    <div class="col-sm-2 sidenav hidden-xs">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg/800px-Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg.png" alt="Logo" style="width:50%; max-width: 100%; margin-bottom: 10px;">
+      <ul class="nav nav-pills nav-stacked">
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
+        <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
+      </ul>
+    </div>
+    
+    <div class="col-sm-9">
+      <div class="well">
+        <h2>ข้อมูลจาก Google Sheets</h2>
+
+
+        <!-- Filter Dropdowns -->
+        <div class="filter-container">
+          <select id="accommodationFilter" class="form-control" onchange="filterData()">
+            <option value="">กรุณาเลือกที่พักนักกีฬา</option>
+            <!-- Accommodation options will be populated here -->
+          </select>
+          <select id="diseaseFilter" class="form-control" onchange="filterData()">
+            <option value="">กรุณาเลือกโรค</option>
+            <!-- Disease options will be populated here -->
+          </select>
+          <button type="button" class="btn btn-danger" onclick="resetFilters()">Reset Filters</button>
+        </div>
+        <table id="data-table" class="table table-bordered">
+          <thead>
+            <tr>
+              <th>ชื่อ</th>
+              <th>นามสกุล</th>
+              <th>เพศ</th>  
+              <th>ตำแหน่ง</th>
+              <th>ประเภทกีฬา</th>
+              <th>การวินิจฉัย</th>
+              <th>สถานพยาบาลที่เข้ารับการรักษา</th>
+              <th>ที่พักนักกีฬา</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // URL of the Google Sheets data (via Google Apps Script)
+  const sheetUrl = 'https://script.google.com/macros/s/AKfycbyZXp3Vc6k2JI77MmAglJpQ0wdBHpC_DHw_ZnFg2y5nLw9FqKHnMRCcM-yknvv_7dCvZw/exec';
+
+  // Function to fetch data from Google Sheets and populate the table
+  async function fetchData() {
+    try {
+      const response = await fetch(sheetUrl);
+      const data = await response.json();
+      
+      // Store the data in a global variable for filtering
+      window.data = data;
+
+      // Populate the accommodation and disease filters
+      populateAccommodationFilter(data);
+      populateDiseaseFilter(data);
+
+      // Get the table body element
+      const tableBody = document.getElementById('table-body');
+
+      // Loop through the data and insert rows into the table
+      data.forEach(item => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+          <td>${item['ชื่อ (ไม่ต้องใส่คำนำหน้า)']}</td>
+          <td>${item['นามสกุล']}</td>
+          <td>${item['เพศ']}</td>
+          <td>${item['ตำแหน่ง']}</td>
+          <td>${item['ประเภทกีฬา']}</td>
+          <td>${item['ป่วยเป็นโรค']}</td>
+          <td>${item['สถานพยาบาลที่เข้ารับการรักษา']}</td>
+          <td>${item['ชื่อสถานที่พักนักกีฬา']}</td>
+        `;
+
+        tableBody.appendChild(row);
+      });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+  
+  // Function to populate the accommodation filter dropdown
+  function populateAccommodationFilter(data) {
+    const accommodationFilter = document.getElementById('accommodationFilter');
+    const accommodations = new Set(data.map(item => item['ชื่อสถานที่พักนักกีฬา']));
+    
+    accommodations.forEach(acc => {
+      const option = document.createElement('option');
+      option.value = acc;
+      option.textContent = acc;
+      accommodationFilter.appendChild(option);
+    });
+  }
+
+  // Function to populate the disease filter dropdown
+  function populateDiseaseFilter(data) {
+    const diseaseFilter = document.getElementById('diseaseFilter');
+    const diseases = new Set(data.map(item => item['ป่วยเป็นโรค']));
+    
+    diseases.forEach(disease => {
+      const option = document.createElement('option');
+      option.value = disease;
+      option.textContent = disease;
+      diseaseFilter.appendChild(option);
+    });
+  }
+
+  // Function to filter data based on selected filters
+  function filterData() {
+    const accommodationFilter = document.getElementById('accommodationFilter').value;
+    const diseaseFilter = document.getElementById('diseaseFilter').value;
+
+    const filteredData = window.data.filter(item => {
+      const matchesAccommodation = accommodationFilter ? item['ชื่อสถานที่พักนักกีฬา'] === accommodationFilter : true;
+      const matchesDisease = diseaseFilter ? item['ป่วยเป็นโรค'] === diseaseFilter : true;
+      return matchesAccommodation && matchesDisease;
+    });
+
+    // Clear the current table and re-populate with filtered data
+    const tableBody = document.getElementById('table-body');
+    tableBody.innerHTML = ''; // Clear current rows
+
+    filteredData.forEach(item => {
+      const row = document.createElement('tr');
+
+      row.innerHTML = `
+        <td>${item['ชื่อ (ไม่ต้องใส่คำนำหน้า)']}</td>
+        <td>${item['นามสกุล']}</td>
+        <td>${item['เพศ']}</td>
+        <td>${item['ตำแหน่ง']}</td>
+        <td>${item['ประเภทกีฬา']}</td>
+        <td>${item['ป่วยเป็นโรค']}</td>
+        <td>${item['สถานพยาบาลที่เข้ารับการรักษา']}</td>
+        <td>${item['ชื่อสถานที่พักนักกีฬา']}</td>
+      `;
+
+      tableBody.appendChild(row);
+    });
+  }
+
+  // Function to reset filters and show all data
+  function resetFilters() {
+    document.getElementById('accommodationFilter').value = '';
+    document.getElementById('diseaseFilter').value = '';
+    filterData();
+  }
+
+  // Call the fetchData function on page load
+  fetchData();
+</script>
+<footer class="container-fluid text-center" style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: relative; left: 0;">
+  <p>ข้อมูลจาก: <a href="https://nsn.moph.go.th/" target="_blank" style="color: #f8f9fa;">กลุ่มงานควบคุมโรคติดต่อ สำนักงานธารณสุขจังหวัดนครสวรรค์</a> และ Google Sheets</p>
+  <p>พัฒนาโดย นายศิววงค์ เกิดลาภ ตำแหน่ง นักวิชาการสาธารณสุขชำนาญการ</p>
+</footer>
+
+</body>
+</html>
