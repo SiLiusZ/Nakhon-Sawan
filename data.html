@@ -207,8 +207,8 @@
         const row = document.createElement('tr');
 
         row.innerHTML = `
-          <td>${item['ชื่อ (ไม่ต้องใส่คำนำหน้า)']}</td>
-          <td>${item['นามสกุล']}</td>
+          <td>${item['ชื่อ (ไม่ต้องใส่คำนำหน้า)'].substring(0, 3)}xxxx</td>
+          <td>${item['นามสกุล'].substring(0, 3)}xxxx</td>
           <td>${item['เพศ']}</td>
           <td>${item['ตำแหน่ง']}</td>
           <td>${item['ประเภทกีฬา']}</td>
