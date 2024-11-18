@@ -252,36 +252,37 @@
 
   // Function to filter data based on selected filters
   function filterData() {
-    const accommodationFilter = document.getElementById('accommodationFilter').value;
-    const diseaseFilter = document.getElementById('diseaseFilter').value;
+  const accommodationFilter = document.getElementById('accommodationFilter').value;
+  const diseaseFilter = document.getElementById('diseaseFilter').value;
 
-    const filteredData = window.data.filter(item => {
-      const matchesAccommodation = accommodationFilter ? item['ชื่อสถานที่พักนักกีฬา'] === accommodationFilter : true;
-      const matchesDisease = diseaseFilter ? item['ป่วยเป็นโรค'] === diseaseFilter : true;
-      return matchesAccommodation && matchesDisease;
-    });
+  const filteredData = window.data.filter(item => {
+    const matchesAccommodation = accommodationFilter ? item['ชื่อสถานที่พักนักกีฬา'] === accommodationFilter : true;
+    const matchesDisease = diseaseFilter ? item['ป่วยเป็นโรค'] === diseaseFilter : true;
+    return matchesAccommodation && matchesDisease;
+  });
 
-    // Clear the current table and re-populate with filtered data
-    const tableBody = document.getElementById('table-body');
-    tableBody.innerHTML = ''; // Clear current rows
+  // Clear the current table and re-populate with filtered data
+  const tableBody = document.getElementById('table-body');
+  tableBody.innerHTML = ''; // Clear current rows
 
-    filteredData.forEach(item => {
-      const row = document.createElement('tr');
+  filteredData.forEach(item => {
+    const row = document.createElement('tr');
 
-      row.innerHTML = `
-        <td>${item['ชื่อ (ไม่ต้องใส่คำนำหน้า)']}</td>
-        <td>${item['นามสกุล']}</td>
-        <td>${item['เพศ']}</td>
-        <td>${item['ตำแหน่ง']}</td>
-        <td>${item['ประเภทกีฬา']}</td>
-        <td>${item['ป่วยเป็นโรค']}</td>
-        <td>${item['สถานพยาบาลที่เข้ารับการรักษา']}</td>
-        <td>${item['ชื่อสถานที่พักนักกีฬา']}</td>
-      `;
+    row.innerHTML = `
+      <td>${item['ชื่อ (ไม่ต้องใส่คำนำหน้า)'].substring(0, 3)}xxxx</td>
+      <td>${item['นามสกุล'].substring(0, 3)}xxxx</td>
+      <td>${item['เพศ']}</td>
+      <td>${item['ตำแหน่ง']}</td>
+      <td>${item['ประเภทกีฬา']}</td>
+      <td>${item['ป่วยเป็นโรค']}</td>
+      <td>${item['สถานพยาบาลที่เข้ารับการรักษา']}</td>
+      <td>${item['ชื่อสถานที่พักนักกีฬา']}</td>
+    `;
 
-      tableBody.appendChild(row);
-    });
-  }
+    tableBody.appendChild(row);
+  });
+}
+
 
   // Function to reset filters and show all data
   function resetFilters() {
