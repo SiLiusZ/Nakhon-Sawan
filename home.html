@@ -256,7 +256,7 @@
       return acc;
     }, {});
     const sportData = patients.reduce((acc, patient) => {
-      const sport = patient["ประเภทกีฬา"];
+      const sport = patient["ประเภทกีฬา1"];
       acc[sport] = acc[sport] ? acc[sport] + 1 : 1;
       return acc;
     }, {});
@@ -282,7 +282,7 @@
     }, {});
 
     createChart('diseaseChart', 'โรคที่พบ', Object.keys(diseaseData), Object.values(diseaseData));
-    createChart('sportChart', 'ประเภทกีฬา', Object.keys(sportData), Object.values(sportData));
+    createChart('sportChart', 'ประเภทกีฬา1', Object.keys(sportData), Object.values(sportData));
     createChart('ageChart', 'กลุ่มอายุ', Object.keys(ageData), Object.values(ageData));
     createChart('positionChart', 'ประเภท', Object.keys(positionData), Object.values(positionData));
     createChart('hotelChart', 'สถานที่พัก', Object.keys(hotelData), Object.values(hotelData));
