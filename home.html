@@ -16,6 +16,7 @@
       background-color: #f8f9fa;
       display: flex;
       flex-direction: column;
+      padding-bottom: 50px
     }
     .navbar-inverse {
       background-color: #333;
@@ -284,12 +285,12 @@
       return acc;
     }, {});
 
-    createChart('diseaseChart', 'โรคที่พบ', Object.keys(diseaseData), Object.values(diseaseData));
-    createChart('sportChart', 'ประเภทกีฬา1', Object.keys(sportData), Object.values(sportData));
-    createChart('ageChart', 'กลุ่มอายุ', Object.keys(ageData), Object.values(ageData));
-    createChart('positionChart', 'ประเภท', Object.keys(positionData), Object.values(positionData));
-    createChart('hotelChart', 'สถานที่พัก', Object.keys(hotelData), Object.values(hotelData));
-    createChart('affiliationChart', 'ชื่อหน่วยงาน/สังกัดของท่าน', Object.keys(affiliationData), Object.values(affiliationData));
+    createChart('diseaseChart', 'จำนวน', Object.keys(diseaseData), Object.values(diseaseData));
+    createChart('sportChart', 'จำนวน', Object.keys(sportData), Object.values(sportData));
+    createChart('ageChart', 'จำนวน', Object.keys(ageData), Object.values(ageData));
+    createChart('positionChart', 'จำนวน', Object.keys(positionData), Object.values(positionData));
+    createChart('hotelChart', 'จำนวน', Object.keys(hotelData), Object.values(hotelData));
+    createChart('affiliationChart', 'จำนวน', Object.keys(affiliationData), Object.values(affiliationData));
   }
 
   function createChart(chartId, label, labels, data) {
@@ -373,10 +374,12 @@
     window.location.href = page; // ใช้ window.location.href เพื่อเปลี่ยนหน้าไปที่ที่ต้องการ
   }
 </script>
-<footer class="container-fluid text-center" style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: relative; left: 0;">
-  <p>ข้อมูลจาก: <a href="https://nsn.moph.go.th/" target="_blank" style="color: #f8f9fa;">กลุ่มงานควบคุมโรคติดต่อ สำนักงานธารณสุขจังหวัดนครสวรรค์</a> และ Google Sheets</p>
-  <p>พัฒนาโดย นายศิววงค์ เกิดลาภ ตำแหน่ง นักวิชาการสาธารณสุขชำนาญการ</p>
-</footer>
+
 
 </body>
+<footer class="container-fluid text-center" 
+        style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: fixed; bottom: 0; left: 0; z-index: 1000;">
+  <p>ข้อมูลจาก: <a href="https://nsn.moph.go.th/" target="_blank" style="color: #f8f9fa;">กลุ่มงานควบคุมโรคติดต่อ สำนักงานธารณสุขจังหวัดนครสวรรค์</a> และ Google Sheets </p>
+  <p></p>
+</footer>
 </html>
