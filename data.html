@@ -15,6 +15,7 @@
       background-color: #f8f9fa;
       display: flex;
       flex-direction: column;
+      padding-bottom: 50px
     }
     .navbar-inverse {
       background-color: #333;
@@ -182,6 +183,8 @@
             <!-- Data will be populated here -->
           </tbody>
         </table>
+
+
       </div>
     </div>
   </div>
@@ -191,45 +194,30 @@
   // URL of the Google Sheets data (via Google Apps Script)
   const sheetUrl = 'https://script.google.com/macros/s/AKfycbyZXp3Vc6k2JI77MmAglJpQ0wdBHpC_DHw_ZnFg2y5nLw9FqKHnMRCcM-yknvv_7dCvZw/exec';
 
+  // Global variables for pagination
+  let currentPage = 1;
+  const rowsPerPage = 5;
+
   // Function to fetch data from Google Sheets and populate the table
   async function fetchData() {
     try {
-        const response = await fetch(sheetUrl);
-        const data = await response.json();
-        
-        // Store the data in a global variable for filtering
-        window.data = data;
+      const response = await fetch(sheetUrl);
+      const data = await response.json();
 
-        // Populate the accommodation, disease, and sport filters
-        populateAccommodationFilter(data);
-        populateDiseaseFilter(data);
-        populateSportFilter(data); // เพิ่มการเรียกฟังก์ชันนี้
+      // Store the data in a global variable for filtering and pagination
+      window.data = data;
 
-        // Get the table body element
-        const tableBody = document.getElementById('table-body');
+      // Populate the filters
+      populateAccommodationFilter(data);
+      populateDiseaseFilter(data);
+      populateSportFilter(data);
 
-        // Loop through the data and insert rows into the table
-        data.forEach(item => {
-            const row = document.createElement('tr');
-
-            row.innerHTML = `
-                <td>${item['ชื่อ (ไม่ต้องใส่คำนำหน้า)'].substring(0, 3)}xxxx</td>
-                <td>${item['นามสกุล'].substring(0, 3)}xxxx</td>
-                <td>${item['เพศ']}</td>
-                <td>${item['ตำแหน่ง']}</td>
-                <td>${item['ประเภทกีฬา1']}</td>
-                <td>${item['ป่วยเป็นโรค']}</td>
-                <td>${item['สถานพยาบาลที่เข้ารับการรักษา']}</td>
-                <td>${item['ชื่อสถานที่พักนักกีฬา']}</td>
-            `;
-
-            tableBody.appendChild(row);
-        });
+      // Initial table population
+      filterData();
     } catch (error) {
-        console.error('Error fetching data:', error);
+      console.error('Error fetching data:', error);
     }
-}
-
+  }
 
   // Populate the accommodation filter
   function populateAccommodationFilter(data) {
@@ -255,21 +243,21 @@
       diseaseFilter.appendChild(option);
     });
   }
+
   // Populate the sport filter
-function populateSportFilter(data) {
+  function populateSportFilter(data) {
     const sportFilter = document.getElementById('sportFilter');
     const sports = new Set(data.map(item => item['ประเภทกีฬา1']));
     
     sports.forEach(sport => {
-        const option = document.createElement('option');
-        option.value = sport;
-        option.textContent = sport;
-        sportFilter.appendChild(option);
+      const option = document.createElement('option');
+      option.value = sport;
+      option.textContent = sport;
+      sportFilter.appendChild(option);
     });
-}
+  }
 
-
-  // Filter the data based on selected filters
+  // Filter the data based on selected filters and handle pagination
   function filterData() {
     const accommodationFilter = document.getElementById('accommodationFilter').value;
     const diseaseFilter = document.getElementById('diseaseFilter').value;
@@ -283,11 +271,15 @@ function populateSportFilter(data) {
       );
     });
 
+    // Apply pagination logic
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+
     // Clear the table
     document.getElementById('table-body').innerHTML = '';
 
-    // Populate the table with filtered data
-    filteredData.forEach(item => {
+    // Populate the table with filtered and paginated data
+    paginatedData.forEach(item => {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${item['ชื่อ (ไม่ต้องใส่คำนำหน้า)'].substring(0, 3)}xxxx</td>
@@ -301,6 +293,29 @@ function populateSportFilter(data) {
       `;
       document.getElementById('table-body').appendChild(row);
     });
+
+    // Update the pagination buttons
+    updatePagination(filteredData.length);
+  }
+
+  // Update pagination buttons based on filtered data length
+  function updatePagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / rowsPerPage);
+    document.getElementById('pagination').innerHTML = `
+      <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage('prev')">Previous</button>
+      <span>Page ${currentPage} of ${totalPages}</span>
+      <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage('next')">Next</button>
+    `;
+  }
+
+  // Change page (previous or next)
+  function changePage(direction) {
+    if (direction === 'prev' && currentPage > 1) {
+      currentPage--;
+    } else if (direction === 'next') {
+      currentPage++;
+    }
+    filterData();
   }
 
   // Reset the filters
@@ -315,11 +330,17 @@ function populateSportFilter(data) {
   window.onload = fetchData;
 </script>
 
+<!-- Add Pagination Controls Below the Table -->
+<div id="pagination"></div>
+
+
 <!-- Footer -->
-<footer class="container-fluid text-center" style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: relative; left: 0;">
-  <p>ข้อมูลจาก: <a href="https://nsn.moph.go.th/" target="_blank" style="color: #f8f9fa;">กลุ่มงานควบคุมโรคติดต่อ สำนักงานธารณสุขจังหวัดนครสวรรค์</a> และ Google Sheets</p>
-  <p>พัฒนาโดย นายศิววงค์ เกิดลาภ ตำแหน่ง นักวิชาการสาธารณสุขชำนาญการ</p>
-</footer>
+
 
 </body>
+<footer class="container-fluid text-center" 
+        style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: fixed; bottom: 0; left: 0; z-index: 1000;">
+  <p>ข้อมูลจาก: <a href="https://nsn.moph.go.th/" target="_blank" style="color: #f8f9fa;">กลุ่มงานควบคุมโรคติดต่อ สำนักงานธารณสุขจังหวัดนครสวรรค์</a> และ Google Sheets </p>
+  <p></p>
+</footer>
 </html>
