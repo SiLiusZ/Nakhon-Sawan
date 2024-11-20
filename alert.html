@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>ข่าวสถานการณ์โรค ศูนย์ปฏิบัติการภาวะฉุกเฉิน</title>
   <meta charset="utf-8">
@@ -16,48 +17,60 @@
       display: flex;
       flex-direction: column;
     }
-    
+
     .navbar-inverse {
       background-color: #333;
       border-color: #333;
     }
-    .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav > li > a {
+
+    .navbar-inverse .navbar-brand,
+    .navbar-inverse .navbar-nav>li>a {
       color: #f8f9fa !important;
     }
+
     .navbar-inverse .navbar-collapse {
       text-align: center;
     }
+
     .sidenav {
       background-color: #f1f1f1;
       height: 100%;
       padding-top: 20px;
       border-right: 1px solid #ddd;
     }
+
     .sidenav h2 {
       color: #333;
     }
+
     .sidenav ul {
       padding-left: 0;
     }
+
     .sidenav ul li a {
       color: #333;
     }
+
     .sidenav ul li a:hover {
       color: #007bff;
     }
+
     .content {
       height: auto;
       padding: 20px;
     }
+
     .well {
       background-color: #ffffff;
       border: none;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
+
     .well h4 {
       color: #007bff;
     }
+
     .stats-card {
       background-color: #ffffff;
       border-radius: 10px;
@@ -67,14 +80,17 @@
       text-align: center;
       margin-bottom: 20px;
     }
+
     .stats-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     }
+
     .stats-card h4 {
       font-size: 18px;
       color: #333;
     }
+
     .stats-card p {
       font-size: 24px;
       font-weight: bold;
@@ -87,49 +103,72 @@
       .sidenav {
         display: none;
       }
+
       .navbar-collapse {
         text-align: left;
       }
-      #ageChart, #sportChart, #diseaseChart, #positionChart {
+
+      #ageChart,
+      #sportChart,
+      #diseaseChart,
+      #positionChart {
         width: 100% !important;
         height: auto !important;
       }
+
       #chart-container {
         width: 100%;
         height: auto;
       }
+
       .container-fluid.text-center {
-        width: 100vw; /* กำหนดให้กินความกว้างเต็มจอ */
-        box-sizing: border-box; /* เพื่อให้ padding ไม่เพิ่มความกว้าง */
+        width: 100vw;
+        /* กำหนดให้กินความกว้างเต็มจอ */
+        box-sizing: border-box;
+        /* เพื่อให้ padding ไม่เพิ่มความกว้าง */
         padding: 5px;
         background-color: #006838;
         color: #f8f9fa;
         margin-top: 20px;
       }
-      #map { height: 500px; width: 100%; }
+
+      #map {
+        height: 500px;
+        width: 100%;
+      }
     }
 
     .alert-warning {
-  color: red; /* ตั้งค่าสีของข้อความให้เป็นสีแดง */
-  font-size: 18px; /* ขนาดฟอนต์ */
-  font-weight: bold; /* ทำให้ข้อความหนา */
-  text-align: center; /* ตั้งตำแหน่งข้อความให้อยู่กลาง */
-  padding: 10px 0; /* เพิ่มระยะห่างบนและล่าง */
-  background-color: #f8d7da; /* เพิ่มพื้นหลังสีอ่อนแดงเพื่อให้ดูเด่น */
-  border: 1px solid #f5c6cb; /* เพิ่มขอบสีแดงอ่อน */
-}
+      color: red;
+      /* ตั้งค่าสีของข้อความให้เป็นสีแดง */
+      font-size: 18px;
+      /* ขนาดฟอนต์ */
+      font-weight: bold;
+      /* ทำให้ข้อความหนา */
+      text-align: center;
+      /* ตั้งตำแหน่งข้อความให้อยู่กลาง */
+      padding: 10px 0;
+      /* เพิ่มระยะห่างบนและล่าง */
+      background-color: #f8d7da;
+      /* เพิ่มพื้นหลังสีอ่อนแดงเพื่อให้ดูเด่น */
+      border: 1px solid #f5c6cb;
+      /* เพิ่มขอบสีแดงอ่อน */
+      
+    }
+    
   </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-inverse visible-xs">
+  <nav class="navbar navbar-inverse visible-xs">
     <div class="container-fluid">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
-          <span class="icon-bar"></span>                         
+          <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="#">Dashboard</a>
       </div>
@@ -144,109 +183,124 @@
     </div>
   </nav>
 
-<div class="container-fluid">
-  <div class="row content">
-    <div class="col-sm-2 sidenav hidden-xs">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg/800px-Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg.png" alt="Logo" style="width:50%; max-width: 100%; margin-bottom: 10px;">
-      <ul class="nav nav-pills nav-stacked">
-        <li><a href="https://siliusz.github.io/Nakhon-Sawan/alert.html">ตรวจจับการระบาด</a></li>
-        <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
-        <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
-        <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
-      </ul>
-    </div>
-    
-    <div class="col-sm-9">
-      <div class="well">
-        <h2>ตรวจจับการระบาดของโรค</h2>
-        <div id="alert" class="alert-warning"></div>
+  <div class="container-fluid">
+    <div class="row content">
+      <div class="col-sm-2 sidenav hidden-xs">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg/800px-Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg.png"
+          alt="Logo" style="width:50%; max-width: 100%; margin-bottom: 10px;">
+        <ul class="nav nav-pills nav-stacked">
+          <li><a href="https://siliusz.github.io/Nakhon-Sawan/alert.html">ตรวจจับการระบาด</a></li>
+          <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
+          <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
+          <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
+        </ul>
+      </div>
 
-        <table id="diseaseSportPlaceTable" class="table table-bordered">
-          <thead>
-            <tr>
-              <th>โรค</th>
-              <th>ประเภทกีฬา</th>
-              <th>สถานที่พักนักกีฬา</th>
-              <th>จำนวนการระบาด</th>
-            </tr>
-          </thead>
-          <tbody id="table-body">
-            <!-- Data will be populated here -->
-          </tbody>
-        </table>
+      <div class="col-sm-9">
+        <div class="well">
+          <h2>ตรวจจับการระบาดของโรค</h2>
+          <div id="alert" class="alert-warning"></div>
+
+          <table id="diseaseSportPlaceTable" class="table table-bordered">
+            <thead>
+              <tr>
+                <th>โรค</th>
+                <th>ประเภทกีฬา</th>
+                <th>สถานที่พักนักกีฬา</th>
+                <th>จำนวนการระบาด</th>
+                <th>นิยามการตรวจจับ</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data will be populated here -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<script>
-  async function fetchData() {
+  <script>
+    async function fetchData() {
       const url = "https://script.google.com/macros/s/AKfycbyZXp3Vc6k2JI77MmAglJpQ0wdBHpC_DHw_ZnFg2y5nLw9FqKHnMRCcM-yknvv_7dCvZw/exec";
 
       try {
-          let response = await fetch(url);
-          let data = await response.json();
+        let response = await fetch(url);
+        let data = await response.json();
 
-          console.log("ข้อมูลที่ดึงมาจาก Google Sheets:", data);
+        console.log("ข้อมูลที่ดึงมาจาก Google Sheets:", data);
 
-          // สร้างตัวเก็บนับจำนวนคู่ระหว่างโรค, ประเภทกีฬา, และสถานที่พัก
-          let diseaseSportPlaceCounts = {};
+        // สร้างตัวเก็บนับจำนวนคู่ระหว่างโรค, ประเภทกีฬา, และสถานที่พัก
+        let diseaseSportPlaceCounts = {};
 
-          // ตรวจสอบแต่ละรายการในข้อมูล
-          data.forEach(item => {
-              let disease = item['ป่วยเป็นโรค'] ? item['ป่วยเป็นโรค'].trim() : '';
-              let sport = item['ประเภทกีฬา1'] ? item['ประเภทกีฬา1'].trim() : '';
-              let place = item['ชื่อสถานที่พักนักกีฬา'] ? item['ชื่อสถานที่พักนักกีฬา'].trim() : '';
+        // กำหนดเงื่อนไขแจ้งเตือนเฉพาะโรค
+        const diseaseThresholds = {
+          "02 ท้องเสีย": 3, // แจ้งเตือนเมื่อจำนวน >= 3
+          "17 อีสุกอีใส": 1, // แจ้งเตือนเมื่อจำนวน >= 5
 
-              if (disease && sport && place) {
-                  // สร้างคีย์ที่รวมโรค, ประเภทกีฬา, และสถานที่พัก
-                  let key = `${disease} ประเภทกีฬา ${sport} สถานที่ ${place}`;
-                  diseaseSportPlaceCounts[key] = (diseaseSportPlaceCounts[key] || 0) + 1;
-              }
-          });
+        };
 
-          console.log("นับจำนวนคู่โรค, ประเภทกีฬา และสถานที่พัก:", diseaseSportPlaceCounts);
+        // ตรวจสอบแต่ละรายการในข้อมูล
+        data.forEach(item => {
+          let disease = item['ป่วยเป็นโรค'] ? item['ป่วยเป็นโรค'].trim() : '';
+          let sport = item['ประเภทกีฬา1'] ? item['ประเภทกีฬา1'].trim() : '';
+          let place = item['ชื่อสถานที่พักนักกีฬา'] ? item['ชื่อสถานที่พักนักกีฬา'].trim() : '';
 
-          // ตรวจสอบว่าคู่ใดมีมากกว่า 5 ราย
-          let alerts = [];
-          let rows = [];
-          for (let key in diseaseSportPlaceCounts) {
-              if (diseaseSportPlaceCounts[key] >= 5) {
-                  alerts.push(`${key} (${diseaseSportPlaceCounts[key]} ราย)`);
-                  // สร้างแถวในตาราง
-                  let parts = key.split(' ประเภทกีฬา ');
-                  let diseaseName = parts[0];
-                  let sportPlace = parts[1].split(' สถานที่ ')[0];
-                  let place = parts[1].split(' สถานที่ ')[1];
-                  
-                  rows.push(`
-                      <tr>
-                          <td>${diseaseName}</td>
-                          <td>${sportPlace}</td>
-                          <td>${place}</td>
-                          <td>${diseaseSportPlaceCounts[key]} ราย</td>
-                      </tr>
-                  `);
-              }
+          if (disease && sport && place) {
+            // สร้างคีย์ที่รวมโรค, ประเภทกีฬา, และสถานที่พัก
+            let key = `${disease} ประเภทกีฬา ${sport} สถานที่ ${place}`;
+            diseaseSportPlaceCounts[key] = (diseaseSportPlaceCounts[key] || 0) + 1;
           }
+        });
 
-          // แสดงผลแจ้งเตือน
-          if (alerts.length > 0) {
-              document.getElementById("alert").innerText = `คำเตือน: พบโรคและประเภทกีฬาที่ระบาดขั้นต่ำ 5 ราย!`;
-              // แสดงแถวในตาราง
-              document.querySelector("#diseaseSportPlaceTable tbody").innerHTML = rows.join('');
-          } else {
-              document.getElementById("alert").innerText = "ไม่พบโรคและประเภทกีฬาที่ระบาดขั้นต่ำ 5 ราย!.";
-              document.querySelector("#diseaseSportPlaceTable tbody").innerHTML = ''; // ลบแถวจากตาราง
+        console.log("นับจำนวนคู่โรค, ประเภทกีฬา และสถานที่พัก:", diseaseSportPlaceCounts);
+
+        // ตรวจสอบเงื่อนไขการแจ้งเตือน
+        let rows = [];
+        for (let key in diseaseSportPlaceCounts) {
+          let parts = key.split(' ประเภทกีฬา ');
+          let diseaseName = parts[0];
+          let sportPlace = parts[1].split(' สถานที่ ')[0];
+          let place = parts[1].split(' สถานที่ ')[1];
+          let count = diseaseSportPlaceCounts[key];
+
+          // ใช้ threshold ที่กำหนดไว้สำหรับโรค
+          let threshold = diseaseThresholds[diseaseName] || 5; // ค่าเริ่มต้นคือ 5 ถ้าไม่มีการกำหนด
+
+          if (count >= threshold) {
+            // เพิ่มข้อมูลลงในตารางพร้อมเหตุผล
+            let reason = `จำนวนตั้งแต่ ${threshold} ราย (พบ ${count} ราย)`;
+            rows.push(`
+                    <tr>
+                        <td>${diseaseName}</td>
+                        <td>${sportPlace}</td>
+                        <td>${place}</td>
+                        <td>${count} ราย</td>
+                        <td>${reason}</td>
+                    </tr>
+                `);
           }
+        }
+
+        // แสดงผลในตาราง
+        if (rows.length > 0) {
+          document.getElementById("alert").innerText = `คำเตือน: พบโรคและประเภทกีฬาที่ระบาดถึงจำนวนที่กำหนด!`;
+          document.querySelector("#diseaseSportPlaceTable tbody").innerHTML = rows.join('');
+        } else {
+          document.getElementById("alert").innerText = "ไม่พบโรคที่ระบาดถึงจำนวนที่กำหนด.";
+          document.querySelector("#diseaseSportPlaceTable tbody").innerHTML = ''; // ลบแถวจากตาราง
+        }
       } catch (error) {
-          console.error("Error fetching data: ", error);
-          document.getElementById("alert").innerText = "ไม่สามารถดึงข้อมูลได้.";
+        console.error("Error fetching data: ", error);
+        document.getElementById("alert").innerText = "ไม่สามารถดึงข้อมูลได้.";
       }
-  }
+    }
 
-  window.onload = fetchData;
-</script>
+    window.onload = fetchData;
+
+  </script>
 
 </body>
+
 </html>
