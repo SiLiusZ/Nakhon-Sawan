@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>ข่าวสถานการณ์โรค ศูนย์ปฏิบัติการภาวะฉุกเฉิน</title>
   <meta charset="utf-8">
@@ -8,6 +9,11 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-analytics.js"></script>
+
   <link href="https://fonts.googleapis.com/css2?family=TH+Sarabun+PSK&display=swap" rel="stylesheet">
   <style>
     body {
@@ -17,47 +23,60 @@
       flex-direction: column;
       padding-bottom: 50px
     }
+
     .navbar-inverse {
       background-color: #333;
       border-color: #333;
     }
-    .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav > li > a {
+
+    .navbar-inverse .navbar-brand,
+    .navbar-inverse .navbar-nav>li>a {
       color: #f8f9fa !important;
     }
+
     .navbar-inverse .navbar-collapse {
       text-align: center;
     }
+
     .sidenav {
       background-color: #f1f1f1;
       height: 100%;
       padding-top: 20px;
       border-right: 1px solid #ddd;
     }
+
     .sidenav h2 {
       color: #333;
     }
+
     .sidenav ul {
       padding-left: 0;
     }
+
     .sidenav ul li a {
       color: #333;
     }
+
     .sidenav ul li a:hover {
       color: #007bff;
     }
+
     .content {
       height: auto;
       padding: 20px;
     }
+
     .well {
       background-color: #ffffff;
       border: none;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
+
     .well h4 {
       color: #007bff;
     }
+
     .stats-card {
       background-color: #ffffff;
       border-radius: 10px;
@@ -67,14 +86,17 @@
       text-align: center;
       margin-bottom: 20px;
     }
+
     .stats-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     }
+
     .stats-card h4 {
       font-size: 18px;
       color: #333;
     }
+
     .stats-card p {
       font-size: 24px;
       font-weight: bold;
@@ -87,201 +109,217 @@
       .sidenav {
         display: none;
       }
+
       .navbar-collapse {
         text-align: left;
       }
-      #ageChart, #sportChart, #diseaseChart, #positionChart {
+
+      #ageChart,
+      #sportChart,
+      #diseaseChart,
+      #positionChart {
         width: 100% !important;
         height: auto !important;
       }
+
       #chart-container {
         width: 100%;
         height: auto;
       }
+
       .container-fluid.text-center {
-        width: 100vw; /* กำหนดให้กินความกว้างเต็มจอ */
-        box-sizing: border-box; /* เพื่อให้ padding ไม่เพิ่มความกว้าง */
+        width: 100vw;
+        /* กำหนดให้กินความกว้างเต็มจอ */
+        box-sizing: border-box;
+        /* เพื่อให้ padding ไม่เพิ่มความกว้าง */
         padding: 5px;
         background-color: #006838;
         color: #f8f9fa;
         margin-top: 20px;
       }
-      #map { height: 500px; width: 100%; }
+
+      #map {
+        height: 500px;
+        width: 100%;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-inverse visible-xs">
+  <nav class="navbar navbar-inverse visible-xs">
     <div class="container-fluid">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
-          <span class="icon-bar"></span>                         
+          <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="#">Dashboard</a>
       </div>
       <div class="collapse navbar-collapse" id="myNavbar">
         <ul class="nav navbar-nav">
-          <li><a href="https://siliusz.github.io/Nakhon-Sawan/alert.html">ตรวจจับการระบาด</a></li>
-          <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
-          <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
-          <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
+          <li><a href="http://127.0.0.1:5500/success/alert.html">ตรวจจับการระบาด</a></li>
+          <li><a href="http://127.0.0.1:5500/success/home.html">หน้าแรก</a></li>
+          <li><a href="http://127.0.0.1:5500/success/data.html">ข้อมูลผู้ป่วย</a></li>
+          <li><a href="http://127.0.0.1:5500/success/map.html">แผนที่</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
-<div class="container-fluid">
-  <div class="row content">
-    <div class="col-sm-2 sidenav hidden-xs">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg/800px-Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg.png" alt="Logo" style="width:50%; max-width: 100%; margin-bottom: 10px;">
-      <ul class="nav nav-pills nav-stacked">
-        <li><a href="https://siliusz.github.io/Nakhon-Sawan/alert.html">ตรวจจับการระบาด</a></li>
-        <li><a href="https://siliusz.github.io/Nakhon-Sawan/home">หน้าแรก</a></li>
-        <li><a href="https://siliusz.github.io/Nakhon-Sawan/data">ข้อมูลผู้ป่วย</a></li>
-        <li><a href="https://siliusz.github.io/Nakhon-Sawan/map">แผนที่</a></li>
-      </ul>
-    </div>
-    
-    <div class="col-sm-9">
-      <div class="well">
-        <h2>ข้อมูลจาก Google Sheets</h2>
+  <div class="container-fluid">
+    <div class="row content">
+      <div class="col-sm-2 sidenav hidden-xs">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg/800px-Seal_of_the_Ministry_of_Public_Health_of_Thailand.svg.png"
+          alt="Logo" style="width:50%; max-width: 100%; margin-bottom: 10px;">
+        <ul class="nav nav-pills nav-stacked">
+          <li><a href="http://127.0.0.1:5500/success/alert.html">ตรวจจับการระบาด</a></li>
+          <li><a href="http://127.0.0.1:5500/success/home.html">หน้าแรก</a></li>
+          <li><a href="http://127.0.0.1:5500/success/data.html">ข้อมูลผู้ป่วย</a></li>
+          <li><a href="http://127.0.0.1:5500/success/map.html">แผนที่</a></li>
+        </ul>
+      </div>
 
-        <!-- Filter Dropdowns -->
-        <div class="filter-container">
-          <select id="accommodationFilter" class="form-control" onchange="filterData()">
-            <option value="">กรุณาเลือกที่พักนักกีฬา</option>
-            <!-- Accommodation options will be populated here -->
-          </select>
-          <select id="diseaseFilter" class="form-control" onchange="filterData()">
-            <option value="">กรุณาเลือกโรค</option>
-            <!-- Disease options will be populated here -->
-          </select>
-          <select id="sportFilter" class="form-control" onchange="filterData()">
-            <option value="">กรุณาเลือกประเภทกีฬา</option>
-            <!-- Sport options will be populated here -->
-          </select>
-          <button type="button" class="btn btn-danger" onclick="resetFilters()">Reset Filters</button>
+      <div class="col-sm-9">
+        <div class="well">
+          <h2>ข้อมูลจาก Google Sheets</h2>
+
+          <!-- Filter Dropdowns -->
+          <div class="filter-container">
+            <select id="accommodationFilter" class="form-control" onchange="filterData()">
+              <option value="">กรุณาเลือกที่พักนักกีฬา</option>
+              <!-- Accommodation options will be populated here -->
+            </select>
+            <select id="diseaseFilter" class="form-control" onchange="filterData()">
+              <option value="">กรุณาเลือกโรค</option>
+              <!-- Disease options will be populated here -->
+            </select>
+            <select id="sportFilter" class="form-control" onchange="filterData()">
+              <option value="">กรุณาเลือกประเภทกีฬา</option>
+              <!-- Sport options will be populated here -->
+            </select>
+            <button type="button" class="btn btn-danger" onclick="resetFilters()">Reset Filters</button>
+          </div>
+          <table id="data-table" class="table table-bordered">
+            <thead>
+              <tr>
+                <th>ชื่อ</th>
+                <th>นามสกุล</th>
+                <th>เพศ</th>
+                <th>ตำแหน่ง</th>
+                <th>ประเภทกีฬา</th>
+                <th>การวินิจฉัย</th>
+                <th>สถานพยาบาลที่เข้ารับการรักษา</th>
+                <th>ที่พักนักกีฬา</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data will be populated here -->
+            </tbody>
+          </table>
+
+
         </div>
-        <table id="data-table" class="table table-bordered">
-          <thead>
-            <tr>
-              <th>ชื่อ</th>
-              <th>นามสกุล</th>
-              <th>เพศ</th>  
-              <th>ตำแหน่ง</th>
-              <th>ประเภทกีฬา</th>
-              <th>การวินิจฉัย</th>
-              <th>สถานพยาบาลที่เข้ารับการรักษา</th>
-              <th>ที่พักนักกีฬา</th>
-            </tr>
-          </thead>
-          <tbody id="table-body">
-            <!-- Data will be populated here -->
-          </tbody>
-        </table>
-
-
       </div>
     </div>
   </div>
-</div>
 
-<script>
-  // URL of the Google Sheets data (via Google Apps Script)
-  const sheetUrl = 'https://script.google.com/macros/s/AKfycbyZXp3Vc6k2JI77MmAglJpQ0wdBHpC_DHw_ZnFg2y5nLw9FqKHnMRCcM-yknvv_7dCvZw/exec';
+  <script>
+    // URL of the Google Sheets data (via Google Apps Script)
+    const sheetUrl = 'https://script.google.com/macros/s/AKfycbyZXp3Vc6k2JI77MmAglJpQ0wdBHpC_DHw_ZnFg2y5nLw9FqKHnMRCcM-yknvv_7dCvZw/exec';
 
-  // Global variables for pagination
-  let currentPage = 1;
-  const rowsPerPage = 5;
+    // Global variables for pagination
+    let currentPage = 1;
+    const rowsPerPage = 5;
 
-  // Function to fetch data from Google Sheets and populate the table
-  async function fetchData() {
-    try {
-      const response = await fetch(sheetUrl);
-      const data = await response.json();
+    // Function to fetch data from Google Sheets and populate the table
+    async function fetchData() {
+      try {
+        const response = await fetch(sheetUrl);
+        const data = await response.json();
 
-      // Store the data in a global variable for filtering and pagination
-      window.data = data;
+        // Store the data in a global variable for filtering and pagination
+        window.data = data;
 
-      // Populate the filters
-      populateAccommodationFilter(data);
-      populateDiseaseFilter(data);
-      populateSportFilter(data);
+        // Populate the filters
+        populateAccommodationFilter(data);
+        populateDiseaseFilter(data);
+        populateSportFilter(data);
 
-      // Initial table population
-      filterData();
-    } catch (error) {
-      console.error('Error fetching data:', error);
+        // Initial table population
+        filterData();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     }
-  }
 
-  // Populate the accommodation filter
-  function populateAccommodationFilter(data) {
-    const accommodationFilter = document.getElementById('accommodationFilter');
-    const accommodations = new Set(data.map(item => item['ชื่อสถานที่พักนักกีฬา']));
-    accommodations.forEach(accommodation => {
-      const option = document.createElement('option');
-      option.value = accommodation;
-      option.textContent = accommodation;
-      accommodationFilter.appendChild(option);
-    });
-  }
+    // Populate the accommodation filter
+    function populateAccommodationFilter(data) {
+      const accommodationFilter = document.getElementById('accommodationFilter');
+      const accommodations = new Set(data.map(item => item['ชื่อสถานที่พักนักกีฬา']));
+      accommodations.forEach(accommodation => {
+        const option = document.createElement('option');
+        option.value = accommodation;
+        option.textContent = accommodation;
+        accommodationFilter.appendChild(option);
+      });
+    }
 
-  // Populate the disease filter
-  function populateDiseaseFilter(data) {
-    const diseaseFilter = document.getElementById('diseaseFilter');
-    const diseases = new Set(data.map(item => item['ป่วยเป็นโรค']));
-    
-    diseases.forEach(disease => {
-      const option = document.createElement('option');
-      option.value = disease;
-      option.textContent = disease;
-      diseaseFilter.appendChild(option);
-    });
-  }
+    // Populate the disease filter
+    function populateDiseaseFilter(data) {
+      const diseaseFilter = document.getElementById('diseaseFilter');
+      const diseases = new Set(data.map(item => item['ป่วยเป็นโรค']));
 
-  // Populate the sport filter
-  function populateSportFilter(data) {
-    const sportFilter = document.getElementById('sportFilter');
-    const sports = new Set(data.map(item => item['ประเภทกีฬา1']));
-    
-    sports.forEach(sport => {
-      const option = document.createElement('option');
-      option.value = sport;
-      option.textContent = sport;
-      sportFilter.appendChild(option);
-    });
-  }
+      diseases.forEach(disease => {
+        const option = document.createElement('option');
+        option.value = disease;
+        option.textContent = disease;
+        diseaseFilter.appendChild(option);
+      });
+    }
 
-  // Filter the data based on selected filters and handle pagination
-  function filterData() {
-    const accommodationFilter = document.getElementById('accommodationFilter').value;
-    const diseaseFilter = document.getElementById('diseaseFilter').value;
-    const sportFilter = document.getElementById('sportFilter').value;
+    // Populate the sport filter
+    function populateSportFilter(data) {
+      const sportFilter = document.getElementById('sportFilter');
+      const sports = new Set(data.map(item => item['ประเภทกีฬา1']));
 
-    const filteredData = window.data.filter(item => {
-      return (
-        (accommodationFilter === '' || item['ชื่อสถานที่พักนักกีฬา'] === accommodationFilter) &&
-        (diseaseFilter === '' || item['ป่วยเป็นโรค'] === diseaseFilter) &&
-        (sportFilter === '' || item['ประเภทกีฬา1'] === sportFilter)
-      );
-    });
+      sports.forEach(sport => {
+        const option = document.createElement('option');
+        option.value = sport;
+        option.textContent = sport;
+        sportFilter.appendChild(option);
+      });
+    }
 
-    // Apply pagination logic
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+    // Filter the data based on selected filters and handle pagination
+    function filterData() {
+      const accommodationFilter = document.getElementById('accommodationFilter').value;
+      const diseaseFilter = document.getElementById('diseaseFilter').value;
+      const sportFilter = document.getElementById('sportFilter').value;
 
-    // Clear the table
-    document.getElementById('table-body').innerHTML = '';
+      const filteredData = window.data.filter(item => {
+        return (
+          (accommodationFilter === '' || item['ชื่อสถานที่พักนักกีฬา'] === accommodationFilter) &&
+          (diseaseFilter === '' || item['ป่วยเป็นโรค'] === diseaseFilter) &&
+          (sportFilter === '' || item['ประเภทกีฬา1'] === sportFilter)
+        );
+      });
 
-    // Populate the table with filtered and paginated data
-    paginatedData.forEach(item => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
+      // Apply pagination logic
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+
+      // Clear the table
+      document.getElementById('table-body').innerHTML = '';
+
+      // Populate the table with filtered and paginated data
+      paginatedData.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
         <td>${item['ชื่อ (ไม่ต้องใส่คำนำหน้า)'].substring(0, 3)}xxxx</td>
         <td>${item['นามสกุล'].substring(0, 3)}xxxx</td>
         <td>${item['เพศ']}</td>
@@ -291,56 +329,92 @@
         <td>${item['สถานพยาบาลที่เข้ารับการรักษา']}</td>
         <td>${item['ชื่อสถานที่พักนักกีฬา']}</td>
       `;
-      document.getElementById('table-body').appendChild(row);
-    });
+        document.getElementById('table-body').appendChild(row);
+      });
 
-    // Update the pagination buttons
-    updatePagination(filteredData.length);
-  }
+      // Update the pagination buttons
+      updatePagination(filteredData.length);
+    }
 
-  // Update pagination buttons based on filtered data length
-  function updatePagination(totalItems) {
-    const totalPages = Math.ceil(totalItems / rowsPerPage);
-    document.getElementById('pagination').innerHTML = `
+    // Update pagination buttons based on filtered data length
+    function updatePagination(totalItems) {
+      const totalPages = Math.ceil(totalItems / rowsPerPage);
+      document.getElementById('pagination').innerHTML = `
       <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage('prev')">Previous</button>
       <span>Page ${currentPage} of ${totalPages}</span>
       <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage('next')">Next</button>
     `;
-  }
-
-  // Change page (previous or next)
-  function changePage(direction) {
-    if (direction === 'prev' && currentPage > 1) {
-      currentPage--;
-    } else if (direction === 'next') {
-      currentPage++;
     }
-    filterData();
-  }
 
-  // Reset the filters
-  function resetFilters() {
-    document.getElementById('accommodationFilter').value = '';
-    document.getElementById('diseaseFilter').value = '';
-    document.getElementById('sportFilter').value = '';
-    filterData(); // Reapply the filter after reset
-  }
+    // Change page (previous or next)
+    function changePage(direction) {
+      if (direction === 'prev' && currentPage > 1) {
+        currentPage--;
+      } else if (direction === 'next') {
+        currentPage++;
+      }
+      filterData();
+    }
 
-  // Fetch data when the page loads
-  window.onload = fetchData;
-</script>
+    // Reset the filters
+    function resetFilters() {
+      document.getElementById('accommodationFilter').value = '';
+      document.getElementById('diseaseFilter').value = '';
+      document.getElementById('sportFilter').value = '';
+      filterData(); // Reapply the filter after reset
+    }
 
-<!-- Add Pagination Controls Below the Table -->
-<div id="pagination"></div>
+    // Fetch data when the page loads
+    window.onload = fetchData;
+
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZyrpIFITfUN3DSC9wOG3-rd84riX9cnI",
+      authDomain: "siliusz.firebaseapp.com",
+      projectId: "siliusz",
+      storageBucket: "siliusz.firebasestorage.app",
+      messagingSenderId: "1093600764129",
+      appId: "1:1093600764129:web:fd33b0b13664bc78b157a0",
+      measurementId: "G-KJLF5LZQ6L"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Optional: Initialize Firebase Analytics
+    const analytics = firebase.analytics();
+
+    // ตรวจสอบสถานะผู้ใช้ล็อกอิน
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        // ถ้าผู้ใช้ล็อกอินแล้ว
+        console.log('User is signed in:', user);
+      } else {
+        // ถ้าผู้ใช้ไม่ได้ล็อกอิน
+        console.log('User is not signed in');
+        // เปลี่ยนเส้นทางไปที่หน้า login
+        window.location.href = "http://127.0.0.1:5500/login/login.html";
+      }
+    });
 
 
-<!-- Footer -->
+
+  </script>
+
+  <!-- Add Pagination Controls Below the Table -->
+  <div id="pagination"></div>
+
+
+  <!-- Footer -->
 
 
 </body>
-<footer class="container-fluid text-center" 
-        style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: fixed; bottom: 0; left: 0; z-index: 1000;">
-  <p>ข้อมูลจาก: <a href="https://nsn.moph.go.th/" target="_blank" style="color: #f8f9fa;">กลุ่มงานควบคุมโรคติดต่อ สำนักงานธารณสุขจังหวัดนครสวรรค์</a> และ Google Sheets </p>
+<footer class="container-fluid text-center"
+  style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: fixed; bottom: 0; left: 0; z-index: 1000;">
+  <p>ข้อมูลจาก: <a href="https://nsn.moph.go.th/" target="_blank" style="color: #f8f9fa;">กลุ่มงานควบคุมโรคติดต่อ
+      สำนักงานธารณสุขจังหวัดนครสวรรค์</a> และ Google Sheets </p>
   <p></p>
 </footer>
+
 </html>
