@@ -397,6 +397,20 @@
         window.location.href = "https://siliusz.github.io/Nakhon-Sawan/login.html";
       }
     });
+    function autoLogout() {
+      firebase.auth().signOut().then(() => {
+        console.log("User logged out successfully.");
+        // เมื่อ logout สำเร็จ ให้ไปหน้า login
+        window.location.href = 'https://siliusz.github.io/Nakhon-Sawan/login.html';
+      }).catch((error) => {
+        console.error("Error during logout:", error);
+      });
+    }
+
+    // ตัวอย่างการทำ logout โดยอัตโนมัติ
+    setTimeout(autoLogout, 600000); // 10 นาที (600,000ms) หลังจากที่ผู้ใช้ทำกิจกรรมเสร็จ (เช่น inactivity)
+
+
 
 
 
