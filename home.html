@@ -8,6 +8,8 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=TH+Sarabun+PSK&display=swap" rel="stylesheet">
   <style>
     
@@ -204,6 +206,21 @@
 
 
 <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAZyrpIFITfUN3DSC9wOG3-rd84riX9cnI",
+    authDomain: "siliusz.firebaseapp.com",
+    projectId: "siliusz",
+    storageBucket: "siliusz.firebasestorage.app",
+    messagingSenderId: "1093600764129",
+    appId: "1:1093600764129:web:fd33b0b13664bc78b157a0",
+    measurementId: "G-KJLF5LZQ6L"
+  };
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const analytics = firebase.analytics();
+
+  console.log("Firebase has been initialized.");
   const sheetUrl = 'https://script.google.com/macros/s/AKfycbyZXp3Vc6k2JI77MmAglJpQ0wdBHpC_DHw_ZnFg2y5nLw9FqKHnMRCcM-yknvv_7dCvZw/exec';
 
   function fetchSheetData() {
@@ -373,6 +390,12 @@
   function changePage(page) {
     window.location.href = page; // ใช้ window.location.href เพื่อเปลี่ยนหน้าไปที่ที่ต้องการ
   }
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) {
+      // ถ้าไม่มีผู้ใช้เข้าสู่ระบบ ให้เปลี่ยนเส้นทางไปยังหน้า login
+      window.location.href = "login.html";
+    }
+  });
 </script>
 
 
