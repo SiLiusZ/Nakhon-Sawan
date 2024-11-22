@@ -9,6 +9,7 @@
     <!-- Firebase SDKs Version 8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <style>
         body {
@@ -91,16 +92,18 @@
     <div class="register-container">
         <h2>Register</h2>
         <form id="register-form">
+            <input type="text" id="first-name" placeholder="First Name" required>
+            <input type="text" id="last-name" placeholder="Last Name" required>
             <input type="email" id="register-email" placeholder="Email" required>
             <input type="password" id="register-password" placeholder="Password" required>
             <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+            <input type="tel" id="phone-number" placeholder="Phone Number" required>
             <button type="submit">Register</button>
         </form>
         <div id="message"></div>
-        <a href="login.html">Already have an account? Login here.</a>
+        <a href="login.html">มีบัญชีอยู่แล้ว? เข้าสู่ระบบที่นี่</a>
     </div>
 
-    <!-- Load Firebase App and Firebase Auth SDK -->
     <script>
         // Firebase configuration
         const firebaseConfig = {
@@ -116,14 +119,18 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
 
         // Handle registration
         document.getElementById('register-form').addEventListener('submit', function (e) {
             e.preventDefault();
 
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
+            const phoneNumber = document.getElementById('phone-number').value;
 
             // Check if passwords match
             if (password !== confirmPassword) {
@@ -134,8 +141,32 @@
             // Create new user
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // Registration successful
-                    document.getElementById('message').innerText = "Registration successful! You can now login.";
+                    const user = userCredential.user;
+
+                    // Update profile with name
+                    user.updateProfile({
+                        displayName: `${firstName} ${lastName}`
+                    }).then(() => {
+                        console.log("Profile updated successfully!");
+                    }).catch((error) => {
+                        console.error("Error updating profile:", error);
+                    });
+
+                    // Save additional info in Firestore
+                    db.collection("users").doc(user.uid).set({
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        phoneNumber: phoneNumber,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        console.log("User data saved in Firestore!");
+                        document.getElementById('message').innerText = "ลงทะเบียนสำเร็จ! คุณสามารถเข้าสู่ระบบได้แล้ว";
+                        document.getElementById('register-form').reset();
+                    }).catch((error) => {
+                        console.error("Error saving user data:", error);
+                        document.getElementById('message').innerText = "Error saving user data.";
+                    });
                 })
                 .catch((error) => {
                     // Handle errors
