@@ -84,6 +84,19 @@
             margin-top: 15px;
             font-size: 14px;
         }
+
+        /* จัดการตำแหน่งของไอคอนตา */
+        .input-container {
+            position: relative;
+        }
+
+        .eye-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -95,8 +108,23 @@
             <input type="text" id="first-name" placeholder="First Name" required>
             <input type="text" id="last-name" placeholder="Last Name" required>
             <input type="email" id="register-email" placeholder="Email" required>
-            <input type="password" id="register-password" placeholder="Password" required>
-            <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+
+            <!-- Password Input Field with Eye Icon -->
+            <div class="input-container">
+                <input type="password" id="register-password" placeholder="Password" required>
+                <span class="eye-icon" onclick="togglePasswordVisibility('register-password')">
+                    👁️
+                </span>
+            </div>
+
+            <!-- Confirm Password Input Field with Eye Icon -->
+            <div class="input-container">
+                <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                <span class="eye-icon" onclick="togglePasswordVisibility('confirm-password')">
+                    👁️
+                </span>
+            </div>
+
             <input type="tel" id="phone-number" placeholder="Phone Number" required>
             <button type="submit">Register</button>
         </form>
@@ -173,6 +201,13 @@
                     document.getElementById('message').innerText = "Error: " + error.message;
                 });
         });
+
+        // Toggle password visibility
+        function togglePasswordVisibility(id) {
+            var passwordField = document.getElementById(id);
+            var type = passwordField.type === "password" ? "text" : "password";
+            passwordField.type = type;
+        }
     </script>
 </body>
 
