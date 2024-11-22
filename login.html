@@ -100,6 +100,40 @@
             margin-top: 15px;
             font-size: 14px;
         }
+
+        /* จัดการตำแหน่งของไอคอนตา */
+        .input-container {
+            position: relative;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .eye-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            color: #333;
+        }
+
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
     </style>
 </head>
 
@@ -109,7 +143,14 @@
         <h2>Login</h2>
         <form id="login-form">
             <input type="email" id="email" placeholder="Email" required>
-            <input type="password" id="password" placeholder="Password" required>
+            <div class="input-container">
+                <input type="password" id="password" placeholder="Password" required>
+                <span class="eye-icon" onclick="togglePasswordVisibility('password')">👁️</span>
+            </div>
+
+
+
+
             <button type="submit">Login</button>
         </form>
         <div id="message"></div>
@@ -194,6 +235,12 @@
         });
 
 
+        // Toggle password visibility
+        function togglePasswordVisibility(id) {
+            var passwordField = document.getElementById(id);
+            var type = passwordField.type === "password" ? "text" : "password";
+            passwordField.type = type;
+        }
 
 
 
