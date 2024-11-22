@@ -199,7 +199,7 @@
         <div class="row" id="stats-row">
           <div class="col-sm-6">
             <div class="stats-card">
-              <h4>โรคที่พบ</h4>
+              <h4>กลุ่มโรค</h4>
               <canvas id="diseaseChart" width="100" height="50"></canvas>
             </div>
           </div>
@@ -293,7 +293,7 @@
 
     `;
             const diseaseData = patients.reduce((acc, patient) => {
-              const disease = patient["ป่วยเป็นโรค"];
+              const disease = patient["กลุ่มโรค"];
               acc[disease] = acc[disease] ? acc[disease] + 1 : 1;
               return acc;
             }, {});
@@ -431,29 +431,33 @@
           const analytics = firebase.analytics();
 
 
-          const auth = firebase.auth();
-          auth.onAuthStateChanged(user => {
-            if (user) {
-              console.log('User is signed in:', user);
-              // แสดงข้อมูลที่ต้องการหรือเปลี่ยนหน้า
-            } else {
-              console.log('No user is signed in');
-              // เปลี่ยนไปหน้า login
-              window.location.href = "https://siliusz.github.io/Nakhon-Sawan/login.html";
-            }
-          });
-          function autoLogout() {
-            firebase.auth().signOut().then(() => {
-              console.log("User logged out successfully.");
-              // เมื่อ logout สำเร็จ ให้ไปหน้า login
-              window.location.href = 'https://siliusz.github.io/Nakhon-Sawan/login.html';
-            }).catch((error) => {
-              console.error("Error during logout:", error);
-            });
-          }
+          firebase.auth().onAuthStateChanged(function (user) {
+        if (user) {
+          // ถ้าผู้ใช้ล็อกอินแล้ว
+          console.log('User is signed in:', user);
+        } else {
+          // ถ้าผู้ใช้ไม่ได้ล็อกอิน
+          console.log('User is not signed in');
+          // เปลี่ยนเส้นทางไปที่หน้า login
+          window.location.href = "https://siliusz.github.io/Nakhon-Sawan/login.html";
+        }
+      });
+      function autoLogout() {
+        firebase.auth().signOut().then(() => {
+          console.log("User logged out successfully.");
+          // เมื่อ logout สำเร็จ ให้ไปหน้า login
+          window.location.href = 'https://siliusz.github.io/Nakhon-Sawan/login.html';
+        }).catch((error) => {
+          console.error("Error during logout:", error);
+        });
+      }
 
-          // ตัวอย่างการทำ logout โดยอัตโนมัติ
-          setTimeout(autoLogout, 600000); // 10 นาที (600,000ms) หลังจากที่ผู้ใช้ทำกิจกรรมเสร็จ (เช่น inactivity)
+      // ตัวอย่างการทำ logout โดยอัตโนมัติ
+      setTimeout(autoLogout, 600000); // 10 นาที (600,000ms) หลังจากที่ผู้ใช้ทำกิจกรรมเสร็จ (เช่น inactivity)
+
+
+
+
 
 
 
