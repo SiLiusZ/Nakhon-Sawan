@@ -127,9 +127,15 @@
       }
     }
 
-    #map {
+    #map,
+    #map1 {
       height: 400px;
       width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .well {
+      padding: 20px;
     }
   </style>
 </head>
@@ -170,72 +176,52 @@
           <li><a href="https://siliusz.github.io/Nakhon-Sawan/map.html">แผนที่</a></li>
         </ul>
       </div>
-
-      <div class="col-sm-9">
-        <div class="well">
-          <h4>กรองข้อมูลตามโรค</h4>
-          <select id="diseaseFilter" class="form-control">
-            <option value="">เลือกโรค</option>
-          </select>
-          <select id="placeFilter" class="form-control">
-            <option value="">เลือกสถานที่พักนักกีฬา</option>
-          </select>
-        </div>
-
-
-        <div id="section1" class="section active">
-          <h3>สถานที่ตั้งจากข้อมูลใน Google Sheets</h3>
-          <div id="map"></div>
-        </div>
-      </div>
+  <div class="col-sm-9">
+    <div class="well">
+      <h4>กรองข้อมูลตามโรค</h4>
+      <select id="diseaseFilter" class="form-control">
+        <option value="">เลือกโรค</option>
+      </select>
+      <select id="placeFilter" class="form-control">
+        <option value="">เลือกสถานที่พักนักกีฬา</option>
+      </select>
+    </div>
+    <div id="section1" class="col-sm-6">
+      <h3>สถานที่พักที่ป่วยเป็นโรค</h3>
+      <div id="map"></div>
+    </div>
+    <div id="section2" class="col-sm-6">
+      <h3>สถานที่แข่งเป็นโรค</h3>
+      <div id="map1"></div>
     </div>
 
     <script>
       const sheetUrl = 'https://script.google.com/macros/s/AKfycbyZXp3Vc6k2JI77MmAglJpQ0wdBHpC_DHw_ZnFg2y5nLw9FqKHnMRCcM-yknvv_7dCvZw/exec';
 
-      // Fetch data from Google Sheets
       fetch(sheetUrl)
         .then(response => response.json())
         .then(data => {
-          // Initialize the map
-          const map = L.map('map').setView([15.87, 100.9925], 6); // Starting point is Thailand
+          const map = L.map('map').setView([15.70345272777914, 100.11579310832812], 13); // Map 1
+          const map1 = L.map('map1').setView([15.70345272777914, 100.11579310832812], 13); // Map 2
 
-          // Add Stamen Terrain tile layer for a colorful background
-          L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CartoDB</a>',
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
           }).addTo(map);
 
-          const bounds = L.latLngBounds();
-          let markers = []; // Array to hold the markers for later removal
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+          }).addTo(map1);
 
-          // Function to remove all markers from the map
-          function removeAllMarkers() {
-            markers.forEach(marker => {
-              map.removeLayer(marker);
-            });
-            markers = []; // Clear markers array
-          }
-
-          // Initialize disease dropdown and set to hold unique diseases
           const diseaseDropdown = document.getElementById('diseaseFilter');
-          const diseases = new Set(); // Use Set to ensure diseases are unique
-
           const placeDropdown = document.getElementById('placeFilter');
-          const places = new Set(); // Use Set to ensure places are unique
+          const diseases = new Set();
+          const places = new Set();
 
-          // Collect unique diseases and places from the data
-          data.forEach(location => {
-            const disease = location["ป่วยเป็นโรค"];
-            if (disease) {
-              diseases.add(disease);
-            }
-            const place = location["ชื่อสถานที่พักนักกีฬา"];
-            if (place) {
-              places.add(place);
-            }
+          data.forEach(item => {
+            if (item["ป่วยเป็นโรค"]) diseases.add(item["ป่วยเป็นโรค"]);
+            if (item["ชื่อสถานที่พักนักกีฬา"]) places.add(item["ชื่อสถานที่พักนักกีฬา"]);
           });
 
-          // Add diseases to the dropdown
           diseases.forEach(disease => {
             const option = document.createElement('option');
             option.value = disease;
@@ -243,7 +229,6 @@
             diseaseDropdown.appendChild(option);
           });
 
-          // Add places to the dropdown
           places.forEach(place => {
             const option = document.createElement('option');
             option.value = place;
@@ -251,134 +236,94 @@
             placeDropdown.appendChild(option);
           });
 
-          // Custom icons for the locations
           const iconพักนักกีฬา = L.icon({
             iconUrl: 'https://cdn.icon-icons.com/icons2/3223/PNG/512/hotel_building_stars_holiday_vacation_icon_196736.png',
             iconSize: [40, 40],
-            iconAnchor: [32, 32],
-            popupAnchor: [0, -32]
+            iconAnchor: [20, 40]
           });
 
           const iconที่จัดแข่ง = L.icon({
             iconUrl: 'https://cdn.icon-icons.com/icons2/1448/PNG/512/42476stadium_99096.png',
             iconSize: [40, 40],
-            iconAnchor: [32, 32],
-            popupAnchor: [0, -32]
+            iconAnchor: [20, 40]
           });
 
-          // Function to place markers on the map
           function placeMarkers(filteredData) {
-            // Clear the patient count object every time the markers are placed
-            const locationPatientCount = {}; // Reset the count object
+            map.eachLayer(layer => {
+              if (layer instanceof L.Marker) map.removeLayer(layer);
+            });
+            map1.eachLayer(layer => {
+              if (layer instanceof L.Marker) map1.removeLayer(layer);
+            });
+
+            const diseaseCounts = {};
 
             filteredData.forEach(location => {
-              const coordinates = location["พิกัดสถานที่ตั้ง"];
               const placeName = location["ชื่อสถานที่พักนักกีฬา"];
               const disease = location["ป่วยเป็นโรค"];
 
-              if (coordinates && placeName) {
-                // นับจำนวนผู้ป่วยที่เกิดขึ้นในสถานที่นั้น ๆ
-                if (!locationPatientCount[placeName]) {
-                  locationPatientCount[placeName] = 0; // Initialize if not exists
-                }
-                locationPatientCount[placeName]++;
-
-                const [lat, lng] = coordinates.split(',').map(Number); // Convert to numbers
-
-                if (!isNaN(lat) && !isNaN(lng)) {
-                  const marker = L.marker([lat, lng], { icon: iconพักนักกีฬา }).addTo(map)
-                    .bindPopup(`<b>${placeName || 'สถานที่'}</b><br>ผู้ป่วย: ${locationPatientCount[placeName]} คน`)
-                    .on('mouseover', function () {
-                      marker.openPopup();
-                    })
-                    .on('mouseout', function () {
-                      marker.closePopup();
-                    });
-
-                  markers.push(marker); // Add to markers array
-                  bounds.extend([lat, lng]);
-                }
-              }
-
-              // Optional: handle a different location for "ที่จัดแข่ง"
-              const locationcompetition = location["พิกัดที่จัดแข่ง"];
-              const locationName = location["ที่จัดแข่ง"];
-
-              if (locationcompetition && locationName) {
-                // นับจำนวนผู้ป่วยที่เกิดขึ้นในสถานที่นั้น ๆ
-                if (!locationPatientCount[locationName]) {
-                  locationPatientCount[locationName] = 0; // Initialize if not exists
-                }
-                locationPatientCount[locationName]++;
-
-                const [lat, lng] = locationcompetition.split(',').map(Number);
-
-                if (!isNaN(lat) && !isNaN(lng)) {
-                  const marker = L.marker([lat, lng], { icon: iconที่จัดแข่ง }).addTo(map)
-                    .bindPopup(`<b>${locationName || 'สถานที่'}</b><br>ผู้ป่วย: ${locationPatientCount[locationName]} คน`)
-                    .on('mouseover', function () {
-                      marker.openPopup();
-                    })
-                    .on('mouseout', function () {
-                      marker.closePopup();
-                    });
-
-                  markers.push(marker); // Add to markers array
-                  bounds.extend([lat, lng]);
-                }
+              if (disease) {
+                if (!diseaseCounts[placeName]) diseaseCounts[placeName] = {};
+                if (!diseaseCounts[placeName][disease]) diseaseCounts[placeName][disease] = 0;
+                diseaseCounts[placeName][disease]++;
               }
             });
 
-            // Fit the map view to the bounds of all markers
-            map.fitBounds(bounds);
+            filteredData.forEach(location => {
+              const coordinates = location["พิกัดสถานที่ตั้ง"];
+              const competitionCoordinates = location["พิกัดที่จัดแข่ง"];
+              const placeName = location["ชื่อสถานที่พักนักกีฬา"];
+              const competitionName = location["ที่จัดแข่ง"];
+              const diseasesInPlace = diseaseCounts[placeName] || {};
+
+              let diseaseText = '';
+              for (const [disease, count] of Object.entries(diseasesInPlace)) {
+                diseaseText += `<strong>${disease}</strong>: ${count} คน<br>`;
+              }
+
+              if (coordinates && placeName) {
+                const [lat, lng] = coordinates.split(',').map(Number);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  L.marker([lat, lng], { icon: iconพักนักกีฬา })
+                    .bindTooltip(
+                      `<strong>สถานที่พัก:</strong> ${placeName}<br>
+                       ${diseaseText}`,
+                      { permanent: false, direction: 'top' }
+                    )
+                    .addTo(map);
+                }
+              }
+
+              if (competitionCoordinates && competitionName) {
+                const [lat, lng] = competitionCoordinates.split(',').map(Number);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  L.marker([lat, lng], { icon: iconที่จัดแข่ง })
+                    .bindTooltip(
+                      `<strong>ที่จัดแข่ง:</strong> ${competitionName}<br>
+                       ${diseaseText} `,
+                      { permanent: false, direction: 'top' }
+                    )
+                    .addTo(map1);
+                }
+              }
+            });
           }
 
-          // Initially place markers for all locations
           placeMarkers(data);
 
-          // Add event listener to filter the map by disease selection
-          diseaseDropdown.addEventListener('change', function () {
+          diseaseDropdown.addEventListener('change', () => {
             const selectedDisease = diseaseDropdown.value;
-            const selectedPlace = placeDropdown.value;
-
-            // Remove all markers first
-            removeAllMarkers();
-
-            // Filter data based on selected disease and place
-            const filteredData = data.filter(location => {
-              const matchesDisease = selectedDisease ? location["ป่วยเป็นโรค"] === selectedDisease : true;
-              const matchesPlace = selectedPlace ? location["ชื่อสถานที่พักนักกีฬา"] === selectedPlace : true;
-              return matchesDisease && matchesPlace;
-            });
-
-            // Place filtered markers on the map
+            const filteredData = data.filter(item => item["ป่วยเป็นโรค"] === selectedDisease || !selectedDisease);
             placeMarkers(filteredData);
           });
 
-          // Add event listener to filter the map by place selection
-          placeDropdown.addEventListener('change', function () {
+          placeDropdown.addEventListener('change', () => {
             const selectedPlace = placeDropdown.value;
-            const selectedDisease = diseaseDropdown.value;
-
-            // Remove all markers first
-            removeAllMarkers();
-
-            // Filter data based on selected place and disease
-            const filteredData = data.filter(location => {
-              const matchesPlace = selectedPlace ? location["ชื่อสถานที่พักนักกีฬา"] === selectedPlace : true;
-              const matchesDisease = selectedDisease ? location["ป่วยเป็นโรค"] === selectedDisease : true;
-              return matchesPlace && matchesDisease;
-            });
-
-            // Place filtered markers on the map
+            const filteredData = data.filter(item => item["ชื่อสถานที่พักนักกีฬา"] === selectedPlace || !selectedPlace);
             placeMarkers(filteredData);
           });
         })
-        .catch(error => {
-          console.error('Error fetching data from Google Sheets:', error);
-        });
-
-
+        .catch(error => console.error('Error fetching data:', error));
 
       const firebaseConfig = {
         apiKey: "AIzaSyAZyrpIFITfUN3DSC9wOG3-rd84riX9cnI",
@@ -423,13 +368,7 @@
 
 
 
-
-
     </script>
-
-
-
-
 </body>
 <footer class="container-fluid text-center"
   style="padding: 5px; background-color: #006838; color: #f8f9fa; margin-top: 20px; width: 100%; position: fixed; bottom: 0; left: 0; z-index: 1000;">
