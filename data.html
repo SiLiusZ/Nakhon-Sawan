@@ -143,6 +143,41 @@
         width: 100%;
       }
     }
+
+    /* Pagination Styles */
+    #pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    #pagination button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      margin: 0 10px;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    #pagination button:hover {
+      background-color: #0056b3;
+    }
+
+    #pagination button:disabled {
+      background-color: #c0c0c0;
+      cursor: not-allowed;
+    }
+
+    #pagination span {
+      font-size: 16px;
+      margin: 0 10px;
+      color: #333;
+    }
   </style>
 </head>
 
@@ -215,6 +250,7 @@
                 <th>การวินิจฉัย</th>
                 <th>สถานพยาบาลที่เข้ารับการรักษา</th>
                 <th>ที่พักนักกีฬา</th>
+                <th>ที่จัดแข่ง</th>
               </tr>
             </thead>
             <tbody id="table-body">
@@ -234,7 +270,7 @@
 
     // Global variables for pagination
     let currentPage = 1;
-    const rowsPerPage = 5;
+    const rowsPerPage = 20;
 
     // Function to fetch data from Google Sheets and populate the table
     async function fetchData() {
@@ -328,6 +364,7 @@
         <td>${item['ป่วยเป็นโรค']}</td>
         <td>${item['สถานพยาบาลที่เข้ารับการรักษา']}</td>
         <td>${item['ชื่อสถานที่พักนักกีฬา']}</td>
+        <td>${item['ที่จัดแข่ง']}</td>
       `;
         document.getElementById('table-body').appendChild(row);
       });
@@ -340,11 +377,12 @@
     function updatePagination(totalItems) {
       const totalPages = Math.ceil(totalItems / rowsPerPage);
       document.getElementById('pagination').innerHTML = `
-      <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage('prev')">Previous</button>
-      <span>Page ${currentPage} of ${totalPages}</span>
-      <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage('next')">Next</button>
-    `;
+    <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage('prev')">Previous</button>
+    <span>Page ${currentPage} of ${totalPages}</span>
+    <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage('next')">Next</button>
+  `;
     }
+
 
     // Change page (previous or next)
     function changePage(direction) {
